@@ -1,0 +1,31 @@
+[
+  {
+    "name": "name",
+    "label": "Name",
+    "type": "text",
+    "required": true
+  },
+  {
+    "name": "phone",
+    "label": "Phone Number",
+    "type": "number",
+    "max": 10,
+    "min": 10
+  },
+  {
+    "name": "age",
+    "label": "age",
+    "type": "number",
+    "max": 100,
+    "min": 0
+  },
+  {
+    "name": "gender",
+    "label": "Gender",
+    "type": "select",
+    "options": [
+      { "label": "Male", "value": "male" },
+      { "label": "Female", "value": "female" }
+    ]
+  }
+]
