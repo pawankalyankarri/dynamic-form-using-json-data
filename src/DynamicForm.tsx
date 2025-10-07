@@ -12,12 +12,12 @@ import { SelectValue } from "@radix-ui/react-select";
 import { Card, CardContent } from "./components/ui/card";
 import { Textarea } from "./components/ui/textarea";
 import { Checkbox } from "./components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "./components/ui/dropdown-menu";
+// import {
+//   DropdownMenu,
+//   DropdownMenuCheckboxItem,
+//   DropdownMenuContent,
+//   DropdownMenuTrigger,
+// } from "./components/ui/dropdown-menu";
 import { MultiSelect } from "./components/ui/multi-select";
 
 type FieldType =
@@ -36,9 +36,9 @@ export interface FieldConfig {
   label: string;
   type: FieldType;
   required?: boolean;
-  options?: { label: string; value: string }[] ;
-  
-  trigger? :string;
+  options?: { label: string; value: string }[];
+
+  trigger?: string;
   max?: number;
   min?: number;
   rows?: number;
@@ -52,6 +52,7 @@ interface DynamicFormProps {
 
 const DynamicForm = ({ schema }: DynamicFormProps) => {
   const [formdata, setFormdata] = useState<Record<string, any>>({});
+  const [collapse,setCollapse] = useState<boolean>(false)
 
   function handleChange(
     e: React.ChangeEvent<
@@ -74,11 +75,11 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
   };
 
   const handleMultiSelect = (fieldName: string, selectedValues: string[]) => {
-  setFormdata((prev) => ({
-    ...prev,
-    [fieldName]: selectedValues,
-  }));
-};
+    setFormdata((prev) => ({
+      ...prev,
+      [fieldName]: selectedValues,
+    }));
+  };
 
   const renderField = (field: FieldConfig) => {
     switch (field.type) {
@@ -90,7 +91,6 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
             required={field.required}
             onChange={handleChange}
             className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-
           />
         );
 
@@ -104,7 +104,6 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
             max={field.max}
             onChange={handleChange}
             className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-
           />
         );
 
@@ -137,7 +136,6 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
             required={field.required}
             onChange={handleChange}
             className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-
           />
         );
       case "date":
@@ -148,7 +146,6 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
             required={field.required}
             onChange={handleChange}
             className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-
           />
         );
       case "textarea":
@@ -159,7 +156,6 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
             rows={field.rows}
             onChange={handleChange}
             className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-
           />
         );
 
@@ -171,20 +167,23 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
             required={field.required}
             defaultChecked={field.defaultChecked}
             className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-
           />
         );
       case "file":
-        return <Input type="file" required={field.required}
-        className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-             />;
+        return (
+          <Input
+            type="file"
+            required={field.required}
+            className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
+          />
+        );
       case "multiselect":
         return (
           // <DropdownMenu>
           //   <DropdownMenuTrigger asChild className="w-full outline-0">
           //     <Button variant="outline" >{field.trigger}</Button>
           //   </DropdownMenuTrigger>
-          //   <DropdownMenuContent className="z-50 bg-gray-50 w-full min-w-full"> 
+          //   <DropdownMenuContent className="z-50 bg-gray-50 w-full min-w-full">
           //     {field.options?.map(item=>{
           //         return(
           //           <DropdownMenuCheckboxItem
@@ -195,21 +194,19 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
           //           >
           //             {item.label}
           //           </DropdownMenuCheckboxItem>
-          //         )               
+          //         )
           //     })}
           //   </DropdownMenuContent>
           // </DropdownMenu>
-           <div className="w-full">
+          <div className="w-full h-full">
             <MultiSelect
-            
-        key={field.name}
-        options={field.options ?? []}
-        selected={formdata[field.name] ?? []}
-        onChange={(val) => handleMultiSelect(field.name, val)}
-        placeholder={ field.trigger}
-        
-      />
-           </div>
+              key={field.name}
+              options={field.options ?? []}
+              selected={formdata[field.name] ?? []}
+              onChange={(val) => handleMultiSelect(field.name, val)}
+              placeholder={field.trigger}
+            />
+          </div>
         );
       default:
         return null;
@@ -217,22 +214,24 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
   };
 
   return (
-    <Card className="w-full max-w-sm shadow-lg">
-      <CardContent>
-        <form className="grid gap-4 p-4" onSubmit={handleSubmit}>
-          {schema.map((field) => (
-            <div key={field.name} className="grid grid-cols-1 gap-1 w-full">
-              <Label className="py-1 capitalize">{field.label}: </Label>
-              <div className="w-full">{renderField(field)}</div>
-            </div>
-          ))}
 
-          <Button type="submit" className="border w-[40%] m-auto">
-            Submit
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+      <Card className={collapse ? "w-full max-w-xl  shadow-lg bg-blue-50 " : "w-full max-w-sm shadow-lg bg-blue-50 "}>
+        <CardContent>
+          <form className={collapse ? "grid gap-4 p-4 grid-cols-2" : "grid gap-4 p-4"} onSubmit={handleSubmit}>
+            {schema.map((field) => (
+              <div key={field.name} className="grid grid-cols-1 gap-1 w-full">
+                <Label className="py-1 capitalize">{field.label}: </Label>
+                <div className="w-full">{renderField(field)}</div>
+              </div>
+            ))}
+            <Button type="submit" className="border w-[40%] m-auto">
+              Submit
+            </Button>
+            <span className="" onClick={()=>setCollapse(!collapse)}>big</span>
+          </form>
+        </CardContent>
+      </Card>
+
   );
 };
 
