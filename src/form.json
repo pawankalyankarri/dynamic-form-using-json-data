@@ -5,19 +5,19 @@
     "type": "text",
     "required": true
   },
-  {
-    "name": "phone",
-    "label": "Phone Number",
-    "type": "number",
-    "max": 10,
-    "min": 10
-  },
+
   {
     "name": "age",
     "label": "age",
     "type": "number",
     "max": 100,
     "min": 0
+  },
+  {
+    "name": "address",
+    "label": "address",
+    "type": "textarea",
+    "rows" :5
   },
   {
     "name": "gender",
@@ -27,5 +27,13 @@
       { "label": "Male", "value": "male" },
       { "label": "Female", "value": "female" }
     ]
+  },
+  {
+    "name": "tc",
+    "label": "terms and conditions",
+    "type": "checkbox",
+    "disable" : true,
+    "defaultChecked" : true
+    
   }
 ]
