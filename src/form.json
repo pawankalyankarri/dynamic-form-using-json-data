@@ -21,13 +21,34 @@
     "rows" :5
   },
   {
+    "name": "address",
+    "label": "address",
+    "type": "file",
+    "rows" :5
+  },
+  {
     "name": "gender",
     "label": "Gender",
     "type": "select",
+    "required" : true,
     "options": [
       { "label": "Male", "value": "male" },
       { "label": "Female", "value": "female" },
       { "label": "Other", "value": "other" }
     ]
+  },
+  
+  {
+    "name": "education",
+    "label": "Education",
+    "type": "multiselect",
+    "trigger" : "Select Education",
+    "required" : true,
+    "options" : [
+       { "label": "10th", "value": "10th" },
+      { "label": "Inter", "value": "inter" },
+      { "label": "Graduation", "value": "graduation" }
+    ]
   }
 ]
+
