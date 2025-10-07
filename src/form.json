@@ -10,6 +10,7 @@
     "name": "age",
     "label": "age",
     "type": "number",
+    "required" : true,
     "max": 100,
     "min": 0
   },
@@ -25,15 +26,8 @@
     "type": "select",
     "options": [
       { "label": "Male", "value": "male" },
-      { "label": "Female", "value": "female" }
+      { "label": "Female", "value": "female" },
+      { "label": "Other", "value": "other" }
     ]
-  },
-  {
-    "name": "tc",
-    "label": "terms and conditions",
-    "type": "checkbox",
-    "disable" : true,
-    "defaultChecked" : true
-    
   }
 ]
