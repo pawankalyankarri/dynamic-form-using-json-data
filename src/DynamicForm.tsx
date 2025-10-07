@@ -1,4 +1,4 @@
-import React from "react";
+import { useState, type FormEvent } from "react";
 import { Label } from "./components/ui/label";
 import { Button } from "./components/ui/button";
 import {
@@ -32,15 +32,33 @@ interface DynamicFormProps {
   schema: FieldConfig[];
 }
 
-const DynamicForm: React.FC<DynamicFormProps> = ({ schema }) => {
-  
+const DynamicForm = ({ schema }:DynamicFormProps) => {
+  const [formdata,setFormdata] = useState<Record<string,any>>({})
 
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    setFormdata({
+      ...formdata,
+      [e.target.name]: e.target.value,
+    });
+  }
+  
+  function handleSubmit(e: FormEvent<HTMLFormElement>){
+    e.preventDefault()
+    console.log(formdata)
+  }
+
+  const handleSelectChange = (name: string) => (value: string) => {
+    setFormdata({
+      ...formdata,
+      [name]: value,
+    });
+  };
 
   const renderField = (field: FieldConfig) => {
     switch (field.type) {
       case "text":
         return (
-          <Input type="text" name={field.name} required={field.required} />
+          <Input type="text" name={field.name} required={field.required} onChange={handleChange} />
         );
 
       case "number":
@@ -51,12 +69,13 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ schema }) => {
             required={field.required}
             min={field.min}
             max={field.max}
+            onChange={handleChange}
           />
         );
 
       case "select":
         return (
-          <Select >
+          <Select onValueChange={handleSelectChange(field.name)} >
             <SelectTrigger className="w-full">
               <SelectValue placeholder={`Select ${field.label}`} className="w-full" />
             </SelectTrigger>
@@ -72,38 +91,40 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ schema }) => {
       case "email" : 
       return(
         <Input
-            type="email"
-            name={field.name}
-            required={field.required}
-            
+            type = "email"
+            name = {field.name}
+            required = {field.required}
+            onChange={handleChange}
           />
       )
       case "date" : 
       return(
         <Input
-            type="date"
-            name={field.name}
-            required={field.required}
+            type = "date"
+            name = {field.name}
+            required = {field.required}
+            onChange={handleChange}
           />
       )
       case 'textarea' : 
         return(
           <Textarea 
-            name={field.name}
-            required={field.required}
-            rows={field.rows}
+            name = {field.name}
+            required = {field.required}
+            rows = {field.rows}
+            onChange={handleChange}
               />
         )
       
         case "checkbox" : 
         return(
           <Checkbox 
-          disabled={field.disable}
+          disabled = {field.disable}
+          name = {field.name}
+          required = {field.required}
           defaultChecked = {field.defaultChecked}
           />
         )
-
-
       default:
         return null;
     }
@@ -112,15 +133,15 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ schema }) => {
   return (
     <Card className="w-full max-w-sm shadow-lg" >
       <CardContent>
-        <form className=" grid gap-4 p-4  ">
+        <form className="grid gap-4 p-4" onSubmit={handleSubmit}>
           {schema.map((field) => (
-            <div key={field.name} className=" grid grid-cols-1 gap-1 w-full">
+            <div key={field.name} className="grid grid-cols-1 gap-1 w-full">
               <Label className="py-1 capitalize" >{field.label}: </Label>
               <div className="w-full" >{renderField(field)}</div>
             </div>
           ))}
 
-          <Button type="submit" className="border w-[40%] m-auto">
+          <Button type="submit" className="border w-[40%] m-auto" >
             Submit
           </Button>
         </form>

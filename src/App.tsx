@@ -22,7 +22,7 @@ function App() {
   const MyFormSchema: FieldConfig[] = MyFormSchemaJson as FieldConfig[];
 
   return (
-    <div className="  grid place-items-center m-auto h-screen">
+    <div className="  grid place-items-center h-screen">
       <DynamicForm schema={MyFormSchema} />
     </div>
   );
