@@ -10,8 +10,10 @@ import {
 import { Input } from "./components/ui/input";
 import { SelectValue } from "@radix-ui/react-select";
 import { Card, CardContent } from "./components/ui/card";
+import { Textarea } from "./components/ui/textarea";
+import { Checkbox } from "./components/ui/checkbox";
 
-type FieldType = "text" | "number" | "select" | "email" | "date";
+type FieldType = "text" | "number" | "select" | "email" | "date" | "textarea" | "checkbox";
 
 export interface FieldConfig {
   name: string;
@@ -21,6 +23,9 @@ export interface FieldConfig {
   options?: { label: string; value: string }[];
   max?: number;
   min?: number;
+  rows?:number;
+  disable?: boolean;
+  defaultChecked? : boolean;
 }
 
 interface DynamicFormProps {
@@ -28,6 +33,9 @@ interface DynamicFormProps {
 }
 
 const DynamicForm: React.FC<DynamicFormProps> = ({ schema }) => {
+  
+
+
   const renderField = (field: FieldConfig) => {
     switch (field.type) {
       case "text":
@@ -49,7 +57,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ schema }) => {
       case "select":
         return (
           <Select >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder={`Select ${field.label}`} className="w-full" />
             </SelectTrigger>
             <SelectContent >
@@ -78,6 +86,22 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ schema }) => {
             required={field.required}
           />
       )
+      case 'textarea' : 
+        return(
+          <Textarea 
+            name={field.name}
+            required={field.required}
+            rows={field.rows}
+              />
+        )
+      
+        case "checkbox" : 
+        return(
+          <Checkbox 
+          disabled={field.disable}
+          defaultChecked = {field.defaultChecked}
+          />
+        )
 
 
       default:
@@ -86,12 +110,12 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ schema }) => {
   };
 
   return (
-    <Card className="w-full max-w-sm" >
+    <Card className="w-full max-w-sm shadow-lg" >
       <CardContent>
         <form className=" grid gap-4 p-4  ">
           {schema.map((field) => (
             <div key={field.name} className=" grid grid-cols-1 gap-1 w-full">
-              <Label className="py-1" >{field.label}: </Label>
+              <Label className="py-1 capitalize" >{field.label}: </Label>
               <div className="w-full" >{renderField(field)}</div>
             </div>
           ))}
