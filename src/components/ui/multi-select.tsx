@@ -14,6 +14,7 @@ import {
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { Button } from "./button";
 
 type Option = {
   label: string;
@@ -46,11 +47,11 @@ export function MultiSelect({
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full">
       {label && (
         <label className="mb-2 block text-sm font-medium">{label}</label>
       )}
-      <div className="relative w-full  bg-gray-50 z-50">
+      <div className="relative w-full  z-50">
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild className="w-full">
             <button
@@ -59,16 +60,25 @@ export function MultiSelect({
             >
               <span>
                 {selected.length > 0
-                  ? options
-                      .filter((opt) => selected.includes(opt.value))
-                      .map((opt) => opt.label)
-                      .join(", ")
+                  ? (() => {
+                      const selectedLabels = options
+                        .filter((opt) => selected.includes(opt.value))
+                        .map((opt) => opt.label);
+
+                      if (selectedLabels.length > 3) {
+                        return `${selectedLabels.slice(0, 3).join(", ")} +${
+                          selectedLabels.length - 3
+                        }`;
+                      }
+
+                      return selectedLabels.join(", ");
+                    })()
                   : placeholder}
               </span>
               <ChevronsUpDown className="h-4 w-4 opacity-50" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="min-w-full w-full p-0" side="bottom">
+          <PopoverContent className="min-w-full w-full p-0" side="bottom" avoidCollisions={false}>
             <Command className="w-full">
               <CommandList className="w-full">
                 <CommandGroup className="w-full">
@@ -88,20 +98,20 @@ export function MultiSelect({
               </CommandList>
               {/* 🔻 Add Reset and Close buttons here */}
               <div className="border-t px-4 py-2 flex justify-between gap-2 bg-gray-50">
-                <button
+                <Button
                   type="button"
                   onClick={() => onChange([])}
                   className="text-sm text-red-500 hover:underline"
                 >
                   Reset
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => setOpen(false)}
                   className="text-sm text-blue-500 hover:underline"
                 >
                   Close
-                </button>
+                </Button>
               </div>
             </Command>
           </PopoverContent>

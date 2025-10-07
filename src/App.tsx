@@ -9,9 +9,11 @@ function App() {
   const MyFormSchema: FieldConfig[] = MyFormSchemaJson as FieldConfig[];
 
   return (
-    <div className="grid place-items-center h-screen">
+    <div className="grid place-items-center h-full w-full">
      {/* <div className="w-full"> <Sample/></div> */}
+
       <DynamicForm schema={MyFormSchema} />
+
     </div>
   );
 }
