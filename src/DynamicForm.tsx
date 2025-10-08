@@ -7,6 +7,8 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCompress, faEye, faEyeSlash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Input } from "./components/ui/input";
 import { SelectValue } from "@radix-ui/react-select";
 import { Card, CardContent, CardFooter } from "./components/ui/card";
@@ -14,7 +16,6 @@ import { Textarea } from "./components/ui/textarea";
 import { Checkbox } from "./components/ui/checkbox";
 
 import { MultiSelect } from "./components/ui/multi-select";
-import Calendar22 from "./components/ui/Calendar22";
 import {
   Popover,
   PopoverContent,
@@ -22,6 +23,8 @@ import {
 } from "./components/ui/popover";
 import { ChevronDownIcon } from "lucide-react";
 import { Calendar } from "./components/ui/calendar";
+import { RadioGroup, RadioGroupItem } from "./components/ui/radio-group";
+import { Switch } from "./components/ui/switch";
 
 type FieldType =
   | "text"
@@ -32,7 +35,12 @@ type FieldType =
   | "textarea"
   | "checkbox"
   | "file"
-  | "multiselect";
+  | "multiselect"
+  | "radio"
+  | "switch"
+  | "inputmap"
+  | "keyvalue"
+  | "password";
 
 export interface FieldConfig {
   name: string;
@@ -41,13 +49,15 @@ export interface FieldConfig {
   type: FieldType;
   required?: boolean;
   options?: { label: string; value: string }[];
-
+  keyPlaceholder?: string;
+  valuePlaceholder?: string;
   trigger?: string;
   max?: number;
   min?: number;
   rows?: number;
   disable?: boolean;
   defaultChecked?: boolean;
+  checked?: boolean;
 }
 
 interface DynamicFormProps {
@@ -59,7 +69,10 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
   const [collapse, setCollapse] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(undefined);
-
+  const [inputList, setInputList] = useState<{id:number, name: string; value: string }[]>([]);
+  const [keyValueList, setKeyValueList] = useState<Record<string,string>[]>([]);
+  const [key, setKey] = useState<string>("");
+  const [value, setValue] = useState<string>("");
   function handleChange(
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -71,9 +84,15 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
     });
   }
 
-  function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    console.log(formdata);
+   function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    console.log('iputlist',inputList)
+    const values = inputList.map(item=> item.value);
+    values.push(...formdata['task'])
+    setFormdata({...formdata, task: values})
+
+    console.log("formdata", formdata);
+
   }
 
   const handleSelectChange = (name: string, value: string) => {
@@ -86,6 +105,64 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
       [fieldName]: selectedValues,
     }));
   };
+
+  const handleInputMap = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormdata({ ...formdata, [name]:[value]  });
+    console.log("formdata", formdata);
+  }
+  const handleInputMapChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    console.log('inputlist',inputList);
+    const updatedList = inputList.map((item) => 
+      item.id.toString() === name ? { ...item, value: value } : item
+    );
+    console.log("updatedList", updatedList);
+
+    setInputList(updatedList);
+    
+    
+
+
+    // const values = inputList.map(item=> item.value);
+    // values.push(...formdata['task'])
+    // setFormdata({...formdata, task: values})
+
+    // const values = updatedList
+    // .filter(item => item.name === name)
+    
+    // console.log("values", values);
+    // setFormdata({ ...formdata, [name]: values  });
+  };
+
+  const createInput = (name:string) => {
+
+    setInputList([...inputList, { id:Date.now(), name: name, value: "" }]);
+    console.log(inputList);
+  };
+
+
+
+        const handleKeyValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const { name, value } = e.target;
+          if (name.startsWith("key-")) {
+            setKey(value);
+          } else if (name.startsWith("value-")) {
+            setValue(value);
+          }
+
+        };
+        const addKeyValuePair = () => {
+          if(key && value){
+            const newPair = { [key]: value };
+            setKey("");
+            setValue("");
+            setKeyValueList([...keyValueList, newPair]);
+            setFormdata({ ...formdata, "keyValueData": [...keyValueList, newPair] });
+          console.log("keyValueList", keyValueList);
+        };
+        }
+
 
   const renderField = (field: FieldConfig) => {
     switch (field.type) {
@@ -231,6 +308,113 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
             />
           </div>
         );
+      case "radio":
+        return (
+          <RadioGroup
+            name={field.name}
+            onValueChange={(val) => handleSelectChange(field.name, val)}
+          >
+            {field.options?.map((item) => {
+              return (
+                <div className="flex gap-2" key={item.value}>
+                  <RadioGroupItem value={item.value} id={item.label} />
+                  <Label htmlFor={item.label}>{item.label}</Label>
+                </div>
+              );
+            })}
+          </RadioGroup>
+        );
+      case "switch":
+        const handleSwitchChange = (value: boolean) => {
+          setFormdata({ ...formdata, [field.name]: value });
+          console.log(formdata)
+        }
+        return (
+          <div className="flex gap-2 ">
+            <Switch id={field.cLabel} className="bg-muted data-[state=checked]:bg-primary"  onCheckedChange={handleSwitchChange} />
+            <Label className="capitalize" htmlFor={field.cLabel}>
+              {field.cLabel}
+            </Label>
+          </div>
+        );
+      case "inputmap":
+        return (
+          <div className="">
+            <div className="flex gap-2 relative">
+              <Input
+                type="text"
+                name={field.name}
+                required={field.required}
+                onChange={handleInputMap}
+                className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
+              />
+              <span
+                className="absolute right-3 top-1"
+                onClick={() => createInput(field.name)}
+              >
+                
+                <FontAwesomeIcon icon={faPlus} />
+              </span>
+            </div>
+            {inputList.map((item,idx) => {
+              // console.log("item", item);
+              return (
+                <div key={idx} className=" mt-2 relative">
+                  <Input
+                    type="text"
+                    name={item.id.toString()}
+                    required={field.required}
+                    onChange={handleInputMapChange}
+                    value={item.value}
+                    className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
+                  />
+                  <span className="absolute right-2 top-1.5" onClick={()=>setInputList(inputList.filter(obj=> obj.id != item.id ))}>❌</span>
+                </div>
+              );
+            })}
+          </div>
+        );
+      case "keyvalue":
+        return (
+          <div className="flex flex-col gap-2"> 
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                name={"key-"+field.name}
+                placeholder="Key"
+                value={key}
+                onChange={handleKeyValueChange}
+                
+                className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
+              />
+              <Input
+                type="text"
+                name={"value-"+field.name}
+                placeholder="Value"
+                value={value}
+                onChange={handleKeyValueChange}
+                className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
+              />
+            </div>
+            <Button variant={"outline"} type="button" className="m-auto" onClick={addKeyValuePair}  >Add</Button>
+          </div>
+        );
+        case "password" : 
+        const [showPassword, setShowPassword] = useState<boolean>(false);
+        return (
+          
+          <div className="flex gap-2 items-center relative">
+          <Input
+            type={showPassword ? "text" : "password"}
+            name={field.name}
+            required={field.required} 
+            onChange={handleChange}
+            className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
+          />
+          <span className="absolute top-1.5 right-2" onClick={()=>{setShowPassword((prev)=>!prev)}}>{showPassword ? <FontAwesomeIcon icon={faEye}/> : <FontAwesomeIcon icon={faEyeSlash}/>}</span>
+          </div>
+        );  
+
       default:
         return null;
     }
@@ -257,9 +441,11 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
               <div className="w-full">{renderField(field)}</div>
             </div>
           ))}
-          <Button type="submit" className="border w-[40%] m-auto">
+          <div className={collapse ? "col-span-2 w-[40%] m-auto" : " w-[40%] m-auto "}>
+         <Button type="submit" className="border w-[100%] m-auto ">
             Submit
           </Button>
+          </div>
         </form>
       </CardContent>
       <CardFooter>
@@ -268,9 +454,10 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
             className="cursor-pointer"
             onClick={() => setCollapse(!collapse)}
           >
-            »
+            <FontAwesomeIcon icon={faCompress} />
           </span>
         )}
+         
       </CardFooter>
     </Card>
   );

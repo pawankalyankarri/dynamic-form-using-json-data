@@ -31,6 +31,17 @@
       { "label": "Other", "value": "other" }
     ]
   },
+  {
+    "name": "country",
+    "label": "Select Country",
+    "type": "radio",
+    "required": true,
+    "options": [
+      { "label": "India", "value": "india" },
+      { "label": "USA", "value": "usa" },
+      { "label": "Other", "value": "other" }
+    ]
+  },
 
   {
     "name": "education",
@@ -57,6 +68,12 @@
     "label": "Enter Email",
     "type": "email"
   },
+    {
+    "name": "password",
+    "label": "password",
+    "type": "password",
+    "required": true
+  },
   {
     "name": "dob",
     "label": "Date Of Birth",
@@ -67,5 +84,27 @@
     "cLabel": "terms & conditions",
     "type": "checkbox",
     "required" : true
+  },
+  {
+    "name": "task",
+    "label": "task",
+    "type": "inputmap",
+    "required": true
+  },
+
+  {
+    "name": "wifi",
+    "label": "wifi",
+    "type": "keyvalue",
+    "required": true,
+    "keyPlaceholder": "ssid",
+    "valuePlaceholder": "password"
+  },
+  
+  {
+    "name": "isEmployed",
+    "cLabel": "Are you employed?",
+    "type": "switch",
+    "defaultChecked": false
   }
 ]
