@@ -78,10 +78,10 @@ export function MultiSelect({
               <ChevronsUpDown className="h-4 w-4 opacity-50" />
             </button>
           </PopoverTrigger>
-          <PopoverContent className="min-w-full w-full p-0" side="bottom" avoidCollisions={false}>
+          <PopoverContent className="min-w-full w-full p-0" side="bottom"   >  {/*  avoidCollisions={false} */}
             <Command className="w-full">
               <CommandList className="w-full">
-                <CommandGroup className="w-full">
+                <CommandGroup className="w-full h-full overflow-auto" >
                   {options.map((option) => (
                     <CommandItem
                       key={option.value}
