@@ -9,16 +9,19 @@ import {
 } from "@/components/ui/select";
 import { Input } from "./components/ui/input";
 import { SelectValue } from "@radix-ui/react-select";
-import { Card, CardContent } from "./components/ui/card";
+import { Card, CardContent, CardFooter } from "./components/ui/card";
 import { Textarea } from "./components/ui/textarea";
 import { Checkbox } from "./components/ui/checkbox";
-// import {
-//   DropdownMenu,
-//   DropdownMenuCheckboxItem,
-//   DropdownMenuContent,
-//   DropdownMenuTrigger,
-// } from "./components/ui/dropdown-menu";
+
 import { MultiSelect } from "./components/ui/multi-select";
+import Calendar22 from "./components/ui/Calendar22";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "./components/ui/popover";
+import { ChevronDownIcon } from "lucide-react";
+import { Calendar } from "./components/ui/calendar";
 
 type FieldType =
   | "text"
@@ -33,7 +36,8 @@ type FieldType =
 
 export interface FieldConfig {
   name: string;
-  label: string;
+  label?: string;
+  cLabel?: string;
   type: FieldType;
   required?: boolean;
   options?: { label: string; value: string }[];
@@ -52,7 +56,9 @@ interface DynamicFormProps {
 
 const DynamicForm = ({ schema }: DynamicFormProps) => {
   const [formdata, setFormdata] = useState<Record<string, any>>({});
-  const [collapse,setCollapse] = useState<boolean>(false)
+  const [collapse, setCollapse] = useState<boolean>(false);
+  const [open, setOpen] = useState(false);
+  const [date, setDate] = useState<Date | undefined>(undefined);
 
   function handleChange(
     e: React.ChangeEvent<
@@ -140,13 +146,43 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
         );
       case "date":
         return (
-          <Input
-            type="date"
-            name={field.name}
-            required={field.required}
-            onChange={handleChange}
-            className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-          />
+          // <Input
+          //   type="date"
+          //   name={field.name}
+          //   required={field.required}
+          //   onChange={handleChange}
+          //   className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
+          // />
+
+          <div className="flex flex-col gap-3">
+            <Popover open={open} onOpenChange={setOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  id="date"
+                  className="w-48 justify-between font-normal"
+                >
+                  {date ? date.toLocaleDateString() : "Select date"}
+                  <ChevronDownIcon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto overflow-hidden p-0  bg-gray-50"
+                align="start"
+              >
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  captionLayout="dropdown"
+                  onSelect={(date) => {
+                    setDate(date);
+                    setFormdata({ ...formdata, [field.name]: date });
+                    setOpen(false);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         );
       case "textarea":
         return (
@@ -161,13 +197,19 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
 
       case "checkbox":
         return (
-          <Checkbox
-            disabled={field.disable}
-            name={field.name}
-            required={field.required}
-            defaultChecked={field.defaultChecked}
-            className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-          />
+          <div className="flex gap-2">
+            <Checkbox
+              disabled={field.disable}
+              name={field.name}
+              required={field.required}
+              defaultChecked={field.defaultChecked}
+              id={field.cLabel}
+              className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
+            />
+            <Label className="capitalize" htmlFor={field.cLabel}>
+              {field.cLabel}
+            </Label>
+          </div>
         );
       case "file":
         return (
@@ -179,25 +221,6 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
         );
       case "multiselect":
         return (
-          // <DropdownMenu>
-          //   <DropdownMenuTrigger asChild className="w-full outline-0">
-          //     <Button variant="outline" >{field.trigger}</Button>
-          //   </DropdownMenuTrigger>
-          //   <DropdownMenuContent className="z-50 bg-gray-50 w-full min-w-full">
-          //     {field.options?.map(item=>{
-          //         return(
-          //           <DropdownMenuCheckboxItem
-          //             className="w-full"
-          //             key={item.label}
-          //             checked={formdata[field.name]?.includes(item.value) ?? false}
-          //             onCheckedChange={() => { handleMultiSelect(field.name, item.value); }}
-          //           >
-          //             {item.label}
-          //           </DropdownMenuCheckboxItem>
-          //         )
-          //     })}
-          //   </DropdownMenuContent>
-          // </DropdownMenu>
           <div className="w-full h-full">
             <MultiSelect
               key={field.name}
@@ -214,24 +237,42 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
   };
 
   return (
-
-      <Card className={collapse ? "w-full max-w-xl  shadow-lg bg-blue-50 " : "w-full max-w-sm shadow-lg bg-blue-50 "}>
-        <CardContent>
-          <form className={collapse ? "grid gap-4 p-4 grid-cols-2" : "grid gap-4 p-4"} onSubmit={handleSubmit}>
-            {schema.map((field) => (
-              <div key={field.name} className="grid grid-cols-1 gap-1 w-full">
-                <Label className="py-1 capitalize">{field.label}: </Label>
-                <div className="w-full">{renderField(field)}</div>
-              </div>
-            ))}
-            <Button type="submit" className="border w-[40%] m-auto">
-              Submit
-            </Button>
-            <span className="" onClick={()=>setCollapse(!collapse)}>big</span>
-          </form>
-        </CardContent>
-      </Card>
-
+    <Card
+      className={
+        collapse
+          ? "w-full max-w-xl  shadow-lg bg-blue-50 "
+          : "w-full max-w-sm shadow-lg bg-blue-50 "
+      }
+    >
+      <CardContent>
+        <form
+          className={
+            collapse ? "grid gap-4  p-4 grid-cols-2" : "grid gap-4 p-4"
+          }
+          onSubmit={handleSubmit}
+        >
+          {schema.map((field) => (
+            <div key={field.name} className="grid grid-cols-1 gap-1 w-full">
+              <Label className="py-1 capitalize">{field.label} </Label>
+              <div className="w-full">{renderField(field)}</div>
+            </div>
+          ))}
+          <Button type="submit" className="border w-[40%] m-auto">
+            Submit
+          </Button>
+        </form>
+      </CardContent>
+      <CardFooter>
+        {schema.length >= 5 && (
+          <span
+            className="cursor-pointer"
+            onClick={() => setCollapse(!collapse)}
+          >
+            »
+          </span>
+        )}
+      </CardFooter>
+    </Card>
   );
 };
 

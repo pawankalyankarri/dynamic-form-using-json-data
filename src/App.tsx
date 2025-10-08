@@ -2,15 +2,13 @@ import DynamicForm from "./DynamicForm";
 import type { FieldConfig } from "./DynamicForm";
 
 import MyFormSchemaJson from "./form.json";
-import Sample from "./Sample";
 
 function App() {
 
   const MyFormSchema: FieldConfig[] = MyFormSchemaJson as FieldConfig[];
 
   return (
-    <div className="grid place-items-center h-full w-full">
-     {/* <div className="w-full"> <Sample/></div> */}
+    <div className="grid place-items-center h-screen w-full">
 
       <DynamicForm schema={MyFormSchema} />
 
