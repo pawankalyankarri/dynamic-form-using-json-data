@@ -330,11 +330,12 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
           console.log(formdata)
         }
         return (
-          <div className="flex gap-2 ">
-            <Switch id={field.cLabel} className="bg-muted data-[state=checked]:bg-primary"  onCheckedChange={handleSwitchChange} />
+          <div className="flex gap-2  ">
+            <Switch id={field.cLabel} className=""  onCheckedChange={handleSwitchChange} />
             <Label className="capitalize" htmlFor={field.cLabel}>
               {field.cLabel}
             </Label>
+            
           </div>
         );
       case "inputmap":
