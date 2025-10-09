@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { use, useState, type FormEvent } from "react";
 import { Label } from "./components/ui/label";
 import { Button } from "./components/ui/button";
 import {
@@ -8,7 +8,12 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCompress, faEye, faEyeSlash, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCompress,
+  faEye,
+  faEyeSlash,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
 import { Input } from "./components/ui/input";
 import { SelectValue } from "@radix-ui/react-select";
 import { Card, CardContent, CardFooter } from "./components/ui/card";
@@ -25,6 +30,7 @@ import { ChevronDownIcon } from "lucide-react";
 import { Calendar } from "./components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "./components/ui/radio-group";
 import { Switch } from "./components/ui/switch";
+import { useNavigate } from "react-router-dom";
 
 type FieldType =
   | "text"
@@ -54,6 +60,8 @@ export interface FieldConfig {
   trigger?: string;
   max?: number;
   min?: number;
+  mindate?: Date;
+  maxdate?: Date;
   rows?: number;
   disable?: boolean;
   defaultChecked?: boolean;
@@ -68,11 +76,16 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
   const [formdata, setFormdata] = useState<Record<string, any>>({});
   const [collapse, setCollapse] = useState<boolean>(false);
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [inputList, setInputList] = useState<{id:number, name: string; value: string }[]>([]);
-  const [keyValueList, setKeyValueList] = useState<Record<string,string>[]>([]);
+  const [inputList, setInputList] = useState<
+    { id: number; name: string; value: string }[]
+  >([]);
+  const [keyValueList, setKeyValueList] = useState<Record<string, string>[]>(
+    []
+  );
   const [key, setKey] = useState<string>("");
   const [value, setValue] = useState<string>("");
+  const navigate = useNavigate();
+
   function handleChange(
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -84,15 +97,24 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
     });
   }
 
-   function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    console.log('iputlist',inputList)
-    const values = inputList.map(item=> item.value);
-    values.push(...formdata['task'])
-    setFormdata({...formdata, task: values})
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    // console.log('iputlist',inputList)
+    const values = inputList.map((item) => item.value);
+    // values.unshift(...formdata["task"]);
+    const updated = {
+      ...formdata,
+      task: [...(formdata.task ?? []), ...values],
+    };
+    setFormdata({});
 
-    console.log("formdata", formdata);
-
+    console.log("formdata", updated);
+    // navigate("/table", { state: { data: updated,json : schema } });
+    // console.log(formdata)
+    setInputList([]);
+    setKeyValueList([]);
+    setKey("");
+    setValue("");
   }
 
   const handleSelectChange = (name: string, value: string) => {
@@ -108,61 +130,50 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
 
   const handleInputMap = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormdata({ ...formdata, [name]:[value]  });
-    console.log("formdata", formdata);
-  }
+    setFormdata({ ...formdata, [name]: [value] });
+    // console.log("formdata", formdata);
+  };
   const handleInputMapChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    console.log('inputlist',inputList);
-    const updatedList = inputList.map((item) => 
+    // console.log('inputlist',inputList);
+    const updatedList = inputList.map((item) =>
       item.id.toString() === name ? { ...item, value: value } : item
     );
-    console.log("updatedList", updatedList);
+    // console.log("updatedList", updatedList);
 
     setInputList(updatedList);
-    
-    
-
-
-    // const values = inputList.map(item=> item.value);
-    // values.push(...formdata['task'])
-    // setFormdata({...formdata, task: values})
-
-    // const values = updatedList
-    // .filter(item => item.name === name)
-    
-    // console.log("values", values);
-    // setFormdata({ ...formdata, [name]: values  });
   };
 
-  const createInput = (name:string) => {
-
-    setInputList([...inputList, { id:Date.now(), name: name, value: "" }]);
-    console.log(inputList);
+  const createInput = (name: string) => {
+    setInputList([...inputList, { id: Date.now(), name: name, value: "" }]);
+    // console.log(inputList);
   };
 
+  const handleKeyValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name.startsWith("key-")) {
+      setKey(value);
+    } else if (name.startsWith("value-")) {
+      setValue(value);
+    }
+  };
+  const addKeyValuePair = () => {
+    if (key && value) {
+      const newPair = { [key]: value };
+      setKey("");
+      setValue("");
+      setKeyValueList([...keyValueList, newPair]);
+      setFormdata({ ...formdata, keyValueData: [...keyValueList, newPair] });
+      // console.log("keyValueList", keyValueList);
+    }
+  };
 
-
-        const handleKeyValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-          const { name, value } = e.target;
-          if (name.startsWith("key-")) {
-            setKey(value);
-          } else if (name.startsWith("value-")) {
-            setValue(value);
-          }
-
-        };
-        const addKeyValuePair = () => {
-          if(key && value){
-            const newPair = { [key]: value };
-            setKey("");
-            setValue("");
-            setKeyValueList([...keyValueList, newPair]);
-            setFormdata({ ...formdata, "keyValueData": [...keyValueList, newPair] });
-          console.log("keyValueList", keyValueList);
-        };
-        }
-
+  const handleDate = (d:Date | undefined,name:string) => {
+    console.log(d)
+    setFormdata({ ...formdata, [name]: d });
+    setOpen(false);
+    console.log(formdata);
+  }
 
   const renderField = (field: FieldConfig) => {
     switch (field.type) {
@@ -222,24 +233,25 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
           />
         );
       case "date":
+        // const [date, setDate] = useState<Date | undefined>(undefined);
+        const dateRange =  field.mindate && field.maxdate ? {
+                    before:  new Date(field.mindate),
+                    after: new Date(field.maxdate),
+                  } : undefined
+        // console.log("dateRange",dateRange)
+        // console.log('mindate',field.mindate)
+        // console.log('maxdate',field.maxdate)
+        
         return (
-          // <Input
-          //   type="date"
-          //   name={field.name}
-          //   required={field.required}
-          //   onChange={handleChange}
-          //   className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-          // />
-
           <div className="flex flex-col gap-3">
             <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
-                  id="date"
+                  id={field.name}
                   className="w-48 justify-between font-normal"
                 >
-                  {date ? date.toLocaleDateString() : "Select date"}
+                  {formdata[field.name] ? new Date(formdata[field.name]).toLocaleDateString() : "Select date"}
                   <ChevronDownIcon />
                 </Button>
               </PopoverTrigger>
@@ -249,13 +261,16 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
               >
                 <Calendar
                   mode="single"
-                  selected={date}
+                  // selected={date}
+                  selected={formdata[field.name] ? new Date(formdata[field.name]) : undefined}
+                  disabled = {dateRange}
                   captionLayout="dropdown"
-                  onSelect={(date) => {
-                    setDate(date);
-                    setFormdata({ ...formdata, [field.name]: date });
-                    setOpen(false);
-                  }}
+                  // onSelect={(date) => {
+                  //   setDate(date);
+                  //   setFormdata({ ...formdata, [field.name]: date });
+                  //   setOpen(false);
+                  // }}
+                  onSelect={(d)=>handleDate(d,field.name)}
                 />
               </PopoverContent>
             </Popover>
@@ -327,15 +342,18 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
       case "switch":
         const handleSwitchChange = (value: boolean) => {
           setFormdata({ ...formdata, [field.name]: value });
-          console.log(formdata)
-        }
+          // console.log(formdata);
+        };
         return (
           <div className="flex gap-2  ">
-            <Switch id={field.cLabel} className=""  onCheckedChange={handleSwitchChange} />
+            <Switch
+              id={field.cLabel}
+              className=""
+              onCheckedChange={handleSwitchChange}
+            />
             <Label className="capitalize" htmlFor={field.cLabel}>
               {field.cLabel}
             </Label>
-            
           </div>
         );
       case "inputmap":
@@ -353,11 +371,10 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
                 className="absolute right-3 top-1"
                 onClick={() => createInput(field.name)}
               >
-                
                 <FontAwesomeIcon icon={faPlus} />
               </span>
             </div>
-            {inputList.map((item,idx) => {
+            {inputList.map((item, idx) => {
               // console.log("item", item);
               return (
                 <div key={idx} className=" mt-2 relative">
@@ -369,7 +386,14 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
                     value={item.value}
                     className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
                   />
-                  <span className="absolute right-2 top-1.5" onClick={()=>setInputList(inputList.filter(obj=> obj.id != item.id ))}>❌</span>
+                  <span
+                    className="absolute right-2 top-1.5"
+                    onClick={() =>
+                      setInputList(inputList.filter((obj) => obj.id != item.id))
+                    }
+                  >
+                    ❌
+                  </span>
                 </div>
               );
             })}
@@ -377,44 +401,61 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
         );
       case "keyvalue":
         return (
-          <div className="flex flex-col gap-2"> 
+          <div className="flex flex-col gap-2">
             <div className="flex gap-2">
               <Input
                 type="text"
-                name={"key-"+field.name}
+                name={"key-" + field.name}
                 placeholder="Key"
                 value={key}
                 onChange={handleKeyValueChange}
-                
                 className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
               />
               <Input
                 type="text"
-                name={"value-"+field.name}
+                name={"value-" + field.name}
                 placeholder="Value"
                 value={value}
                 onChange={handleKeyValueChange}
                 className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
               />
             </div>
-            <Button variant={"outline"} type="button" className="m-auto" onClick={addKeyValuePair}  >Add</Button>
+            <Button
+              variant={"outline"}
+              type="button"
+              className="m-auto"
+              onClick={addKeyValuePair}
+            >
+              Add
+            </Button>
           </div>
         );
-        case "password" : 
+      case "password":
         const [showPassword, setShowPassword] = useState<boolean>(false);
         return (
-          
           <div className="flex gap-2 items-center relative">
-          <Input
-            type={showPassword ? "text" : "password"}
-            name={field.name}
-            required={field.required} 
-            onChange={handleChange}
-            className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
-          />
-          <span className="absolute top-1.5 right-2" onClick={()=>{setShowPassword((prev)=>!prev)}}>{showPassword ? <FontAwesomeIcon icon={faEye}/> : <FontAwesomeIcon icon={faEyeSlash}/>}</span>
+            <Input
+              type={showPassword ? "text" : "password"}
+              name={field.name}
+              required={field.required}
+              onChange={handleChange}
+              autoComplete="new-password"
+              className="focus:outline-none focus:ring-0 focus:ring-offset-0 focus:ring-transparent"
+            />
+            <span
+              className="absolute top-1.5 right-2"
+              onClick={() => {
+                setShowPassword((prev) => !prev);
+              }}
+            >
+              {showPassword ? (
+                <FontAwesomeIcon icon={faEye} />
+              ) : (
+                <FontAwesomeIcon icon={faEyeSlash} />
+              )}
+            </span>
           </div>
-        );  
+        );
 
       default:
         return null;
@@ -442,10 +483,14 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
               <div className="w-full">{renderField(field)}</div>
             </div>
           ))}
-          <div className={collapse ? "col-span-2 w-[40%] m-auto" : " w-[40%] m-auto "}>
-         <Button type="submit" className="border w-[100%] m-auto ">
-            Submit
-          </Button>
+          <div
+            className={
+              collapse ? "col-span-2 w-[40%] m-auto" : " w-[40%] m-auto "
+            }
+          >
+            <Button type="submit" className="border w-[100%] m-auto ">
+              Submit
+            </Button>
           </div>
         </form>
       </CardContent>
@@ -458,7 +503,6 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
             <FontAwesomeIcon icon={faCompress} />
           </span>
         )}
-         
       </CardFooter>
     </Card>
   );

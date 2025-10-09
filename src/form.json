@@ -80,6 +80,14 @@
     "type": "date"
   },
   {
+    "name": "doj",
+    "label": "Date Of joining",
+    "type": "date",
+    "mindate": "2025-09-10",
+    "maxdate": "2025-11-10"
+  },
+
+  {
     "name": "tc",
     "cLabel": "terms & conditions",
     "type": "checkbox",
