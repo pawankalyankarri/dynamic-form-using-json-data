@@ -31,7 +31,6 @@ import { Calendar } from "./components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "./components/ui/radio-group";
 import { Switch } from "./components/ui/switch";
 import { useNavigate } from "react-router-dom";
-import { Calendar23 } from "./components/Calender23";
 import type { DateRange } from "react-day-picker";
 
 type FieldType =
@@ -49,7 +48,8 @@ type FieldType =
   | "inputmap"
   | "keyvalue"
   | "password"
-  | "daterange";
+  | "daterange"
+  | "date-range";
 
 export interface FieldConfig {
   name: string;
@@ -78,7 +78,6 @@ interface DynamicFormProps {
 const DynamicForm = ({ schema }: DynamicFormProps) => {
   const [formdata, setFormdata] = useState<Record<string, any>>({});
   const [collapse, setCollapse] = useState<boolean>(false);
-  const [open, setOpen] = useState(false);
   const [inputList, setInputList] = useState<
     { id: number; name: string; value: string }[]
   >([]);
@@ -149,7 +148,6 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
   const handleDate = (d: Date | undefined, name: string) => {
     // console.log(d);
     setFormdata({ ...formdata, [name]: d });
-    setOpen(false);
     // console.log(formdata);
   };
 
@@ -211,6 +209,8 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
           />
         );
       case "date":
+        const [dopen, setDopen] = useState<boolean>(false);
+
         const dateRange =
           field.mindate && field.maxdate
             ? {
@@ -224,7 +224,7 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
 
         return (
           <div className="flex flex-col gap-3">
-            <Popover open={open} onOpenChange={setOpen}>
+            <Popover open={dopen} onOpenChange={setDopen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -250,60 +250,159 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
                   }
                   disabled={dateRange}
                   captionLayout="dropdown"
-                  onSelect={(d) => handleDate(d, field.name)}
+                  onSelect={(d) => {
+                    handleDate(d, field.name)
+                    setDopen(false);
+
+                  }}
                 />
               </PopoverContent>
             </Popover>
           </div>
         );
-      case "daterange" : 
-          const [range, setRange] = React.useState<DateRange | undefined>(undefined)
-          // const date_Range =
-          // field.mindate && field.maxdate
-          //   ? {
-          //       before: new Date(field.mindate),
-          //       after: new Date(field.maxdate),
-          //     }
-          //   : undefined;
+      
+      case "daterange":
+        const [range, setRange] = React.useState<DateRange | undefined>(undefined);
+
+        // const date_Range =
+        // field.mindate && field.maxdate
+        //   ? {
+        //       before: new Date(field.mindate),
+        //       after: new Date(field.maxdate),
+        //     }
+        //   : undefined;
         // console.log("dateRange",dateRange)
         // console.log('mindate',field.mindate)
         // console.log('maxdate',field.maxdate)
 
         return (
           <div className="flex flex-col gap-3 w-full">
-                <Label htmlFor="dates" className="px-1">
-                  {field.cLabel}
-                </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      id="dates"
-                      className="w-full justify-between font-normal"
-                    >
-                      {range?.from && range?.to
-                        ? `${range.from.toLocaleDateString()} - ${range.to.toLocaleDateString()}`
-                        : "Select date"}
-                      <ChevronDownIcon />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto overflow-hidden p-0 bg-gray-50" align="start">
-                    <Calendar
-                      mode="range"
-                      selected={range}
-                      captionLayout="dropdown"
-                      onSelect={(range) => {
-                        setRange(range)
-                        setFormdata({ ...formdata, [field.name]: range })
-                        console.log(formdata);
-                      }}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+            <Label htmlFor="dates" className="px-1">
+              {field.cLabel}
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  id="dates"
+                  className="w-full justify-between font-normal"
+                >
+                  {range?.from && range?.to
+                    ? `${range.from.toLocaleDateString()} - ${range.to.toLocaleDateString()}`
+                    : "Select date"}
+                  <ChevronDownIcon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto overflow-hidden p-0 bg-gray-50"
+                align="start"
+              >
+                <Calendar
+                  mode="range"
+                  selected={range}
+                  captionLayout="dropdown"
+                  onSelect={(range) => {
+                    setRange(range);
+                    setFormdata({ ...formdata, [field.name]: range });
+                    console.log(formdata);
+                  }}
+                  
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         );
-        
-      case "textarea":
+
+        case "date-range" :
+          const [sopen, setSopen] = useState<boolean>(false);
+          const [eopen, setEopen] = useState<boolean>(false);
+
+          const daterange =
+          field.mindate && field.maxdate
+            ? {
+                before: new Date(field.mindate),
+                after: new Date(field.maxdate),
+              }
+            : undefined;
+        // console.log("dateRange",dateRange)
+        // console.log('mindate',field.mindate)
+        // console.log('maxdate',field.maxdate)
+
+        return (
+          <div className="grid grid-cols-2 gap-2">
+
+          <div className="flex flex-col gap-3">
+            <Popover open={sopen} onOpenChange={setSopen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  id={`start_${field.name}`}
+                  className="w-full justify-between font-normal"
+                >
+                  {formdata[`start_${field.name}`]
+                    ? new Date(formdata[`start_${field.name}`]).toLocaleDateString()
+                    : "StartDate"}
+                  <ChevronDownIcon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto overflow-hidden p-0  bg-gray-50"
+                align="start"
+              >
+                <Calendar
+                  mode="single"
+                  selected={
+                    formdata[`start_${field.name}`]
+                      ? new Date(formdata[`start_${field.name}`])
+                      : undefined
+                  }
+                  disabled={daterange}
+                  captionLayout="dropdown"
+                  onSelect={(d) => {
+                    setSopen(false)
+                    handleDate(d, `start_${field.name}`)}}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="flex flex-col gap-3">
+            <Popover open={eopen} onOpenChange={setEopen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  id={`end_${field.name}`}
+                  className="w-full justify-between font-normal"
+                >
+                  {formdata[`end_${field.name}`]
+                    ? new Date(formdata[`end_${field.name}`]).toLocaleDateString()
+                    : "EndDate"}
+                  <ChevronDownIcon />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto overflow-hidden p-0  bg-gray-50"
+                align="start"
+              >
+                <Calendar
+                  mode="single"
+                  selected={
+                    formdata[`end_${field.name}`]
+                      ? new Date(formdata[`end_${field.name}`])
+                      : undefined
+                  }
+                  disabled={daterange}
+                  captionLayout="dropdown"
+                  onSelect={(d) => {
+                    setEopen(false)
+                    handleDate(d, `end_${field.name}`)}}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          </div>
+          )
+      
+        case "textarea":
         return (
           <Textarea
             name={field.name}
