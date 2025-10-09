@@ -87,6 +87,12 @@
     "mindate": "1990-01-01",
     "maxdate": "2025-10-09"
   },
+  {
+    "name": "exp",
+    "label": "Experience",
+    "type": "date-range"
+
+  },
 
   {
     "name": "tc",
