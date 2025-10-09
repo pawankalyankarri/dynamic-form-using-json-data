@@ -1,4 +1,4 @@
-import { use, useState, type FormEvent } from "react";
+import React, { useState, type FormEvent } from "react";
 import { Label } from "./components/ui/label";
 import { Button } from "./components/ui/button";
 import {
@@ -31,6 +31,8 @@ import { Calendar } from "./components/ui/calendar";
 import { RadioGroup, RadioGroupItem } from "./components/ui/radio-group";
 import { Switch } from "./components/ui/switch";
 import { useNavigate } from "react-router-dom";
+import { Calendar23 } from "./components/Calender23";
+import type { DateRange } from "react-day-picker";
 
 type FieldType =
   | "text"
@@ -46,7 +48,8 @@ type FieldType =
   | "switch"
   | "inputmap"
   | "keyvalue"
-  | "password";
+  | "password"
+  | "daterange";
 
 export interface FieldConfig {
   name: string;
@@ -82,8 +85,7 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
   const [keyValueList, setKeyValueList] = useState<Record<string, string>[]>(
     []
   );
-  const [key, setKey] = useState<string>("");
-  const [value, setValue] = useState<string>("");
+
   const navigate = useNavigate();
 
   function handleChange(
@@ -113,8 +115,8 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
     // console.log(formdata)
     setInputList([]);
     setKeyValueList([]);
-    setKey("");
-    setValue("");
+    // setKey("");
+    // setValue("");
   }
 
   const handleSelectChange = (name: string, value: string) => {
@@ -144,36 +146,12 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
     setInputList(updatedList);
   };
 
-  const createInput = (name: string) => {
-    setInputList([...inputList, { id: Date.now(), name: name, value: "" }]);
-    // console.log(inputList);
-  };
-
-  const handleKeyValueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (name.startsWith("key-")) {
-      setKey(value);
-    } else if (name.startsWith("value-")) {
-      setValue(value);
-    }
-  };
-  const addKeyValuePair = () => {
-    if (key && value) {
-      const newPair = { [key]: value };
-      setKey("");
-      setValue("");
-      setKeyValueList([...keyValueList, newPair]);
-      setFormdata({ ...formdata, keyValueData: [...keyValueList, newPair] });
-      // console.log("keyValueList", keyValueList);
-    }
-  };
-
-  const handleDate = (d:Date | undefined,name:string) => {
-    console.log(d)
+  const handleDate = (d: Date | undefined, name: string) => {
+    // console.log(d);
     setFormdata({ ...formdata, [name]: d });
     setOpen(false);
-    console.log(formdata);
-  }
+    // console.log(formdata);
+  };
 
   const renderField = (field: FieldConfig) => {
     switch (field.type) {
@@ -233,15 +211,17 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
           />
         );
       case "date":
-        // const [date, setDate] = useState<Date | undefined>(undefined);
-        const dateRange =  field.mindate && field.maxdate ? {
-                    before:  new Date(field.mindate),
-                    after: new Date(field.maxdate),
-                  } : undefined
+        const dateRange =
+          field.mindate && field.maxdate
+            ? {
+                before: new Date(field.mindate),
+                after: new Date(field.maxdate),
+              }
+            : undefined;
         // console.log("dateRange",dateRange)
         // console.log('mindate',field.mindate)
         // console.log('maxdate',field.maxdate)
-        
+
         return (
           <div className="flex flex-col gap-3">
             <Popover open={open} onOpenChange={setOpen}>
@@ -249,9 +229,11 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
                 <Button
                   variant="outline"
                   id={field.name}
-                  className="w-48 justify-between font-normal"
+                  className="w-full justify-between font-normal"
                 >
-                  {formdata[field.name] ? new Date(formdata[field.name]).toLocaleDateString() : "Select date"}
+                  {formdata[field.name]
+                    ? new Date(formdata[field.name]).toLocaleDateString()
+                    : "Select date"}
                   <ChevronDownIcon />
                 </Button>
               </PopoverTrigger>
@@ -261,21 +243,66 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
               >
                 <Calendar
                   mode="single"
-                  // selected={date}
-                  selected={formdata[field.name] ? new Date(formdata[field.name]) : undefined}
-                  disabled = {dateRange}
+                  selected={
+                    formdata[field.name]
+                      ? new Date(formdata[field.name])
+                      : undefined
+                  }
+                  disabled={dateRange}
                   captionLayout="dropdown"
-                  // onSelect={(date) => {
-                  //   setDate(date);
-                  //   setFormdata({ ...formdata, [field.name]: date });
-                  //   setOpen(false);
-                  // }}
-                  onSelect={(d)=>handleDate(d,field.name)}
+                  onSelect={(d) => handleDate(d, field.name)}
                 />
               </PopoverContent>
             </Popover>
           </div>
         );
+      case "daterange" : 
+          const [range, setRange] = React.useState<DateRange | undefined>(undefined)
+          // const date_Range =
+          // field.mindate && field.maxdate
+          //   ? {
+          //       before: new Date(field.mindate),
+          //       after: new Date(field.maxdate),
+          //     }
+          //   : undefined;
+        // console.log("dateRange",dateRange)
+        // console.log('mindate',field.mindate)
+        // console.log('maxdate',field.maxdate)
+
+        return (
+          <div className="flex flex-col gap-3 w-full">
+                <Label htmlFor="dates" className="px-1">
+                  {field.cLabel}
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      id="dates"
+                      className="w-full justify-between font-normal"
+                    >
+                      {range?.from && range?.to
+                        ? `${range.from.toLocaleDateString()} - ${range.to.toLocaleDateString()}`
+                        : "Select date"}
+                      <ChevronDownIcon />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto overflow-hidden p-0 bg-gray-50" align="start">
+                    <Calendar
+                      mode="range"
+                      selected={range}
+                      captionLayout="dropdown"
+                      onSelect={(range) => {
+                        setRange(range)
+                        setFormdata({ ...formdata, [field.name]: range })
+                        console.log(formdata);
+                      }}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+        );
+        
       case "textarea":
         return (
           <Textarea
@@ -357,6 +384,13 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
           </div>
         );
       case "inputmap":
+        const createInput = (name: string) => {
+          setInputList([
+            ...inputList,
+            { id: Date.now(), name: name, value: "" },
+          ]);
+          // console.log(inputList);
+        };
         return (
           <div className="">
             <div className="flex gap-2 relative">
@@ -400,6 +434,32 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
           </div>
         );
       case "keyvalue":
+        const [key, setKey] = useState<string>("");
+        const [value, setValue] = useState<string>("");
+
+        const handleKeyValueChange = (
+          e: React.ChangeEvent<HTMLInputElement>
+        ) => {
+          const { name, value } = e.target;
+          if (name.startsWith("key-")) {
+            setKey(value);
+          } else if (name.startsWith("value-")) {
+            setValue(value);
+          }
+        };
+        const addKeyValuePair = () => {
+          if (key && value) {
+            const newPair = { [key]: value };
+            setKey("");
+            setValue("");
+            setKeyValueList([...keyValueList, newPair]);
+            setFormdata({
+              ...formdata,
+              keyValueData: [...keyValueList, newPair],
+            });
+            // console.log("keyValueList", keyValueList);
+          }
+        };
         return (
           <div className="flex flex-col gap-2">
             <div className="flex gap-2">
@@ -466,7 +526,7 @@ const DynamicForm = ({ schema }: DynamicFormProps) => {
     <Card
       className={
         collapse
-          ? "w-full max-w-xl  shadow-lg bg-blue-50 "
+          ? "w-full max-w-2xl  shadow-lg bg-blue-50 "
           : "w-full max-w-sm shadow-lg bg-blue-50 "
       }
     >

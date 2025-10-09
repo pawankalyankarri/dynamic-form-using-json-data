@@ -22,8 +22,7 @@ const DynamicTable = () => {
           <TableRow>
                 {json.map((item : {name:string},idx:number) =>{
                     return(
-                        <TableHead className="w-[100px]" key={idx}>{item?.name}</TableHead>
- 
+                        <TableHead className="w-[100px]" key={idx}>{}</TableHead>
                     )
                 })}
             <TableHead className="w-[100px]">Invoice</TableHead>

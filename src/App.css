@@ -1,9 +1,36 @@
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
+
+@layer components {
+  .rdp-day_range_start {
+    @apply bg-primary text-primary-foreground rounded-l-md;
+  }
+
+  .rdp-day_range_end {
+    @apply bg-primary text-primary-foreground rounded-r-md;
+  }
+
+  .rdp-day_range_middle {
+    @apply bg-muted text-muted-foreground;
+  }
+}
+
+
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
 }
+
+:root {
+  --primary: 240 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  --muted: 210 20% 95%;
+  --muted-foreground: 210 10% 30%;
+}
+
 
 .logo {
   height: 6em;

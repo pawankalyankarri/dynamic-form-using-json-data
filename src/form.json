@@ -42,7 +42,6 @@
       { "label": "Other", "value": "other" }
     ]
   },
-
   {
     "name": "education",
     "label": "Education",
@@ -68,8 +67,8 @@
     "label": "Enter Email",
     "type": "email"
   },
-    {
-    "name": "password",
+  {
+    "name": "psw",
     "label": "password",
     "type": "password",
     "required": true
@@ -77,21 +76,23 @@
   {
     "name": "dob",
     "label": "Date Of Birth",
-    "type": "date"
+    "type": "date",
+    "mindate": "1990-01-01",
+    "maxdate": "2025-10-09"
   },
   {
-    "name": "doj",
-    "label": "Date Of joining",
-    "type": "date",
-    "mindate": "2025-09-10",
-    "maxdate": "2025-11-10"
+    "name": "experience",
+    "cLabel": "Work Experience",
+    "type": "daterange",
+    "mindate": "1990-01-01",
+    "maxdate": "2025-10-09"
   },
 
   {
     "name": "tc",
     "cLabel": "terms & conditions",
     "type": "checkbox",
-    "required" : true
+    "required": true
   },
   {
     "name": "task",
@@ -108,7 +109,6 @@
     "keyPlaceholder": "ssid",
     "valuePlaceholder": "password"
   },
-  
   {
     "name": "isEmployed",
     "cLabel": "Are you employed?",
